@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# .env file
+.env
+
+# cmake default build directory
+build/
