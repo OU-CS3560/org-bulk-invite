@@ -1,5 +1,7 @@
+#include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <iterator>
 #include <sstream>
 #include <stdexcept>
 #include <vector>
@@ -21,6 +23,7 @@
 #include <fmt/ostream.h>
 #include <nlohmann/json.hpp>
 #include <dotenv.h>
+#include <rapidcsv.h>
 
 using json = nlohmann::json;
 
@@ -77,6 +80,9 @@ void send_invitation(const std::string& token, const std::string &org_name, int 
             request.perform();
             is_sent = true;
             std::cout << response.str() << std::endl;
+
+            // TODO: Propoerly handle `Retry-After` if one is received.
+            // TODO: Check for 4xx or 5xx and handle the errors properly.
         } catch (curlpp::RuntimeError &e) {
             std::cerr << "runtime error, waiting before try again\n";
             attempt_count += 1;
@@ -118,23 +124,37 @@ int main(int argc, char *argv[]) {
 
     // Read in the input file.
     std::ifstream email_file;
-    email_file.open(input_filename.c_str());
-    if (!email_file.is_open()) {
-        fmt::print(std::cerr, "failed to open file '{}''\n", input_filename);
-        return -1;
-    }
+    std::vector<std::string> email_addresses;
 
-    try {
-        curlpp::Cleanup cleaner;
+    if (input_filename.substr(input_filename.find_last_of(".") + 1) == "csv") {
+        // Assume a CSV users file from ta-tooling.
+        rapidcsv::Document doc(input_filename);
+
+        email_addresses = doc.GetColumn<std::string>("emailHandle");
+        std::for_each(email_addresses.begin(), email_addresses.end(), [](std::string &handle){ handle = handle + "@ohio.edu"; });
+    } else {
+        // Assume text file.
+        email_file.open(input_filename.c_str());
+        if (!email_file.is_open()) {
+            fmt::print(std::cerr, "failed to open file '{}''\n", input_filename);
+            return -1;
+        }
+
         std::string line;
         while (std::getline(email_file, line)) {
             auto pos = line.rfind("@ohio.edu");
             if (pos == std::string::npos) {
-                fmt::print("'{}' is not a valid OHIO email address. skip sending an invitation.\n", line);
-                sleep(WAIT_DURATION);
+                fmt::print("'{}' is not a valid OHIO email address. it will be skipped.\n", line);
                 continue;
             }
-            fmt::print("sending an invitation to '{}'\n", line);
+            email_addresses.push_back(line);
+        }
+    }
+
+    try {
+        curlpp::Cleanup cleaner;
+        for (std::string email_address : email_addresses) {
+            fmt::print("sending an invitation to '{}'\n", email_address);
             // send_invitation(token, org_name, team_id, line);
 
             sleep(WAIT_DURATION);
@@ -145,8 +165,9 @@ int main(int argc, char *argv[]) {
     } catch (curlpp::RuntimeError &e) {
         std::cout << e.what() << std::endl;
     }
-    email_file.close();
-
+    if (email_file.is_open()) {
+        email_file.close();
+    }
 
     return 0;
 }

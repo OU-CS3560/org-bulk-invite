@@ -52,6 +52,12 @@ CPMAddPackage(
   GITHUB_REPOSITORY adeharo9/cpp-dotenv
 )
 
+CPMAddPackage(
+  NAME rapidcsv
+  GIT_TAG "v8.62"
+  GITHUB_REPOSITORY d99kris/rapidcsv
+)
+
 # ---- Create standalone executable ----
 
 file(GLOB sources CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp)
@@ -60,7 +66,7 @@ add_executable(${PROJECT_NAME} ${sources})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17 OUTPUT_NAME "BulkInvite")
 
-target_link_libraries(${PROJECT_NAME} cxxopts fmt::fmt curlpp nlohmann_json cpp_dotenv)
+target_link_libraries(${PROJECT_NAME} cxxopts fmt::fmt curlpp nlohmann_json cpp_dotenv rapidcsv)
 
 macro(print_all_variables)
     message(STATUS "print_all_variables------------------------------------------{")

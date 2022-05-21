@@ -18,8 +18,16 @@ to send an invite to all the email addresses listed in `email_addresses.txt`.
 ./build/standalone/BulkInvite -f email_addresses.txt
 ```
 
+If a CSV file is given to the program, it will assume that the file is generated from [ta-tooling](https://github.com/krerkkiat/ta-tooling) program, and
+will look for email handles in the `emailHandle` column. It will also append `@ohio.edu` to the handles automatically. 
+
 ## Note
 
 Do note that the `GH_TOKEN` has to be from the owner of the organization.
 
 This program interacts with the [Organization Member of GitHub API](https://docs.github.com/en/rest/orgs/members#create-an-organization-invitation).
+
+## Todo
+
+- [ ] Implement the team id lookup program.
+
