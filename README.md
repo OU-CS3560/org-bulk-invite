@@ -29,5 +29,6 @@ This program interacts with the [Organization Member of GitHub API](https://docs
 
 ## Todo
 
-- [ ] Implement the team id lookup program.
-
+- [ ] Properly handle rate limiting.
+- [ ] Extract repeating code for sending the request (e.g. back-off, response code checking and handling, header setup).
+- [x] Implement the team id lookup program.
