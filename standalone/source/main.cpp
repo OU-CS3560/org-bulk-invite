@@ -212,12 +212,14 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    std::string input_filename;
+    std::string input_filename, team_slug_search;
     cxxopts::Options options("BulkInvite", "Send multiple invites to GitHub organization");
     // clang-format off
     options.add_options()
       ("h,help", "Show help")
-      ("f,file", "Input file name", cxxopts::value(input_filename)->default_value("email_addresses.txt"));
+      ("f,file", "Input file name", cxxopts::value(input_filename)->default_value("email_addresses.txt"))
+      ("t,team-id-only", "Only query for team ID using team slug", cxxopts::value<bool>()->default_value("false"))
+      ("d,dry-run", "Does not send the actual invitation out", cxxopts::value<bool>()->default_value("false"));
     // clang-formaat on
 
     auto result = options.parse(argc, argv);
@@ -269,11 +271,15 @@ int main(int argc, char *argv[]) {
             fmt::print(std::cout, "team_id for {:s} is {:d}\n", team_slug, team_id);
         }
 
-        for (std::string email_address : email_addresses) {
-            fmt::print("sending an invitation to '{}'\n", email_address);
-            // send_invitation(token, org_name, team_id, line);
-
-            sleep(WAIT_DURATION);
+        if (!result["team-id-only"].as<bool>()) {
+            for (std::string email_address : email_addresses) {
+                if (result["dry-run"].as<bool>()) {
+                    fmt::print("[dry-run] sending an invitation to '{}'\n", email_address);
+                } else {
+                    send_invitation(token, org_name, team_id, email_address);
+                }
+                sleep(WAIT_DURATION);
+            }
         }
 
     } catch (curlpp::LogicError &e) {
