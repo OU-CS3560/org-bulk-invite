@@ -160,14 +160,14 @@ void send_invitation(const std::string& token, const std::string &org_name, int 
             // TODO: Propoerly handle `Retry-After` if one is received.
             // TODO: Check for 4xx or 5xx and handle the errors properly.
             auto response_code = curlpp::infos::ResponseCode::get(request);
-            if (response_code == 200) {
-
+            if (response_code == 200 || response_code == 201) {
+                fmt::print(std::cout, "got {:d} code. invitation should be sent", response_code);
             } else if (response_code >= 400 && response_code <= 499) {
-
+                fmt::print(std::cout, "got {:d} for {:s} \n", response_code, email_address);
             } else if (response_code >= 500 && response_code <= 599) {
-
+                fmt::print(std::cout, "got {:d} for {:s} \n", response_code, email_address);
             } else {
-                fmt::print(std::cout, "get {:d} which we do not know how to handle\n", response_code);
+                fmt::print(std::cout, "got {:d} for {:s} which we do not know how to handle\n", response_code, email_address);
             }
         } catch (curlpp::RuntimeError &e) {
             std::cerr << "runtime error, waiting before try again\n";
