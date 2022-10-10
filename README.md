@@ -23,7 +23,7 @@ will look for email handles in the `emailHandle` column. It will also append `@o
 
 ## Note
 
-Do note that the `GH_TOKEN` has to be from the owner of the organization.
+Do note that the `GH_TOKEN` has to be from the owner of the organization and must be SSO authorized.
 
 This program interacts with the [Organization Member of GitHub API](https://docs.github.com/en/rest/orgs/members#create-an-organization-invitation).
 
@@ -32,3 +32,4 @@ This program interacts with the [Organization Member of GitHub API](https://docs
 - [ ] Properly handle rate limiting.
 - [ ] Extract repeating code for sending the request (e.g. back-off, response code checking and handling, header setup).
 - [x] Implement the team id lookup program.
+- [ ] Check if response is 403 with `x-github-sso: required; <more data>`
